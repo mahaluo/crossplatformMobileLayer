@@ -19,6 +19,7 @@ import Projects from "./projects";
 import { MaterialIcons } from "@expo/vector-icons";
 import moment from "moment";
 
+
 function Home({ navigation }) {
   //loading window
   const [load, setLoad] = useState(false);
