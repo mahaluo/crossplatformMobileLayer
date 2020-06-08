@@ -68,9 +68,15 @@ function Home({ navigation }) {
         });
 
         const jsonUser = await user.json();
-        console.log("user: " + jsonUser + " signed in.. ");
-        setUser(jsonUser);
-        onLoginSuccess();
+        if (jsonUser.error) {
+          throw jsonUser.error;
+        }
+        else {
+          console.log("user: " + jsonUser + " signed in.. ");
+          setUser(jsonUser);
+          onLoginSuccess();
+        }
+        
       } catch (error) {
         console.log(error);
         onLoginFailure();

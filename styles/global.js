@@ -90,7 +90,9 @@ export const globalStyles = StyleSheet.create({
     justifyContent: "space-evenly"
   },
   projectCardFooter: {
-    justifyContent: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignContent: 'center',
   },
   projectIconRow: {
     paddingBottom: 16,

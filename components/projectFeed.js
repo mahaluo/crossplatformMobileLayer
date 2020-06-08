@@ -308,7 +308,6 @@ const ProjectFeed = (props) => {
                     
                     </View>
                  
-
                   </View>
                   
                 )}

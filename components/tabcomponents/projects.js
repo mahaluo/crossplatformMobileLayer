@@ -11,7 +11,6 @@ import { globalStyles } from "../../styles/global";
 import { MaterialIcons } from "@expo/vector-icons";
 import Loading from "../loading";
 import FlatlistProjectItem from '../flatlistProjectItem';
-import Swipeable from "react-native-gesture-handler/Swipeable";
 import * as firebase from "firebase";
 import "firebase/firestore";
 
@@ -22,6 +21,7 @@ const Projects = (props) => {
   const [userProjects, setUserProjects] = useState();
   const [load, setLoad] = useState(false);
   const [user, setUser] = useState(props.user);
+
 
   const refreshProjects = () => {
     console.log("project feed refreshing.. ");
@@ -64,18 +64,23 @@ const Projects = (props) => {
 
   const deleteItem = (id) => {
 
-    console.log('deleting project.. ');
+    console.log('filtering project list.. ');
+
+    const list = [...userProjects];
+    const filteredList = list.filter(item => item.id !== id);
+    console.log(filteredList);
+    setUserProjects(filteredList);
 
     async function deleteProject() {
       firebase
       .firestore()
       .collection("projectList")
       .doc("projects")
-      .collection(props.user)
+      .collection(user)
       .doc(id)
       .delete()
       .then(() => {
-        console.log("deleted project " + id);
+        console.log("deleted project" + id);
       })
       .catch((err) => {
         console.log(err);
@@ -83,7 +88,7 @@ const Projects = (props) => {
     }
 
     deleteProject();
-}
+  }
 
   useEffect(() => {
     try {
@@ -99,24 +104,38 @@ const Projects = (props) => {
       {load ? (
         <Loading />
       ) : (
-        <FlatList
-          data={userProjects}
-          renderItem={({ item }) => (
-            <View>
-              <Swipeable
-                renderLeftActions={deleteItem(item.id)}>
-              
+          <FlatList
+            data={userProjects}
+            renderItem={({ item }) => (
+              <View style={globalStyles.projectCard}>
                 <FlatlistProjectItem
-                project={item} 
-                user={user}/>
+                  project={item}
+                  user={user} />
 
-              </Swipeable>
-            </View>
-          )}
+                <View style={globalStyles.projectCardFooter}>
+
+                  <View style={globalStyles.projectCreatedAt}>
+                    <Text style={globalStyles.smallText}>{item.createdAt}</Text>
+                  </View>
+
+                  <TouchableOpacity onPress={() => deleteItem(item.id)}>
+                    <MaterialIcons
+                      style={globalStyles.projectIcon}
+                      name="delete-forever"
+                      size={30}
+                      color="coral"
+                    />
+                  </TouchableOpacity>
+
+                </View>
+
+              </View>
+            )}
 
 
-        />
-      )}
+
+          />
+        )}
     </View>
   );
 };

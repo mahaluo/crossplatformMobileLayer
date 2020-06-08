@@ -14,17 +14,20 @@ import Loading from "./loading";
 import { globalStyles } from "../styles/global";
 
 const NewProject = (props) => {
+
   console.log("user passed from props: " + props.user);
   const [load, setLoad] = useState(true);
   const [newProjectTitle, setNewProjectTitle] = useState();
   const [newProjectBody, setNewProjectBody] = useState();
 
   useEffect(() => {
+    
     setTimeout(() => {
       setLoad(false);
     }, 600);
+
   }, [load])
-  
+
   const createNewProject = () => {
     setLoad(true);
 
@@ -87,7 +90,6 @@ const NewProject = (props) => {
           ></TextInput>
         </View>
 
-        <View style={globalStyles.projectCardFooter}>
           <View style={globalStyles.projectIconRow}>
             <TouchableOpacity
               onPress={() => clearNewProjectBody()}
@@ -104,7 +106,7 @@ const NewProject = (props) => {
             </TouchableOpacity>
           </View>
         </View>
-      </View>}
+      }
       
     </View>
   );

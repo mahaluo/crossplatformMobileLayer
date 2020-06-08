@@ -23,7 +23,6 @@ const FlatListProjectItem = (props) => {
     const [listComments, setListComments] = useState();
     const [emptyComments, setEmptyComments] = useState();
 
-
     const toggleSolved = (id) => {
         console.log('toggle solved');
         setLoadSolved(true);
@@ -104,7 +103,6 @@ const FlatListProjectItem = (props) => {
         }, 1200);
     }
 
-
     const toggleComments = (id) => {
         console.log('toggle comments');
         setLoadComments(true);
@@ -156,10 +154,8 @@ const FlatListProjectItem = (props) => {
         }, 1200);
     }
 
-
-
     return (
-        <View style={globalStyles.projectCard}>
+        <View>
             <View style={globalStyles.projectCardHeader}>
                 <Text style={globalStyles.projectTitle}>{props.project.title}</Text>
             </View>
@@ -184,7 +180,7 @@ const FlatListProjectItem = (props) => {
                 </View>
             </View>
 
-            <View style={globalStyles.projectCardFooter}>
+         
                 <View style={globalStyles.projectIconRow}>
                     <View>
                         <TouchableOpacity onPress={() => toggleSolved(props.project.id)}>
@@ -253,12 +249,7 @@ const FlatListProjectItem = (props) => {
                     </View>
 
                 </View>
-
-                <View style={globalStyles.projectCreatedAt}>
-                    <Text style={globalStyles.smallText}>{props.project.createdAt}</Text>
-                </View>
-            </View>
-
+           
         </View>
     )
 }
