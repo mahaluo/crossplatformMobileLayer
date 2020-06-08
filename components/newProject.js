@@ -44,7 +44,9 @@ const NewProject = (props) => {
       .firestore()
       .collection("projectList")
       .doc("projects")
-      .collection(props.user)
+      .collection('users')
+      .doc(props.user)
+      .collection('userproject')
       .add({
         ...newProject,
       })

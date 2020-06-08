@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
     StyleSheet,
     Text,
@@ -8,12 +8,12 @@ import {
 } from "react-native";
 import { globalStyles } from "../styles/global";
 import { MaterialIcons } from "@expo/vector-icons";
-import { FlatList } from "react-native-gesture-handler";
 import * as firebase from "firebase";
 import "firebase/firestore";
 
 const FlatListProjectItem = (props) => {
     console.log("user passed from props: " + props.user);
+    console.log('list passed from props' +  JSON.stringify(props.project));
     const [solved, setSolved] = useState(props.project.solved);
     const [shared, setShared] = useState(props.project.shared);
     const [comments, setComments] = useState(false);
@@ -33,7 +33,9 @@ const FlatListProjectItem = (props) => {
                 .firestore()
                 .collection("projectList")
                 .doc("projects")
-                .collection(props.user)
+                .collection('users')
+                .doc(props.user)
+                .collection('userproject')
                 .doc(id)
                 .update({'solved': false})
                 .then(() => {
@@ -49,7 +51,9 @@ const FlatListProjectItem = (props) => {
                 .firestore()
                 .collection("projectList")
                 .doc("projects")
-                .collection(props.user)
+                .collection('users')
+                .doc(props.user)
+                .collection('userproject')
                 .doc(id)
                 .update({'solved': true})
                 .then(() => {
@@ -73,7 +77,9 @@ const FlatListProjectItem = (props) => {
                 .firestore()
                 .collection("projectList")
                 .doc("projects")
-                .collection(props.user)
+                .collection('users')
+                .doc(props.user)
+                .collection('userproject')
                 .doc(id)
                 .update({'shared': false})
                 .then(() => {
@@ -89,7 +95,9 @@ const FlatListProjectItem = (props) => {
                 .firestore()
                 .collection("projectList")
                 .doc("projects")
-                .collection(props.user)
+                .collection('users')
+                .doc(props.user)
+                .collection('userproject')
                 .doc(id)
                 .update({'shared': true})
                 .then(() => {

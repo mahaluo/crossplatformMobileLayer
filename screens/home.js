@@ -19,6 +19,7 @@ import Projects from "../components/tabcomponents/projects";
 import NewProject from "../components/newProject";
 import PublicProjectFeed from "../components/publicProjectFeed";
 import { MaterialIcons } from "@expo/vector-icons";
+
 import moment from "moment";
 import { FlatList } from "react-native-gesture-handler";
 
@@ -40,11 +41,6 @@ function Home({ navigation }) {
 
   //register
   const [registerOpen, setRegisterOpen] = useState(false);
-
-  //stored lists
-  const [storedProjects, setStoredProjects] = useState();
-  const [publicProjects, setPublicProjects] = useState([]);
-  const projectList = [];
 
   //tabs
   const [home, setHome] = useState(true);
@@ -76,7 +72,7 @@ function Home({ navigation }) {
           setUser(jsonUser);
           onLoginSuccess();
         }
-        
+
       } catch (error) {
         console.log(error);
         onLoginFailure();
@@ -119,17 +115,11 @@ function Home({ navigation }) {
     setLoad(false);
   };
 
-  // useEffect(() => {
+  useEffect(() => {
 
-  //   try {
-  //     setTimeout(() => {
-  //       refreshPublicProjects();
-  //     }, 1000);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
+    console.log('auth state changed.. ');
 
-  // }, [])
+  }, [auth]);
 
   const handleTabContent = (tab) => {
     if (tab === "projects") {
@@ -146,6 +136,24 @@ function Home({ navigation }) {
       setHome(true);
     }
   };
+
+  const handleSignOut = () => {
+    firebase
+      .auth()
+      .signOut()
+      .then(function () {
+        console.log("signing out user");
+        setAuth(false);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+      setAccount(false);
+      setProjects(false);
+      setHome(true);
+  };
+
 
   return (
 
@@ -185,8 +193,8 @@ function Home({ navigation }) {
               {load ? (
                 <Loading />
               ) : (
-                  <View>
-                    <PublicProjectFeed />
+                  <View style={{ flex: 1 }}>
+                    <PublicProjectFeed user={user} />
                   </View>
                 )}
             </View>
@@ -194,35 +202,58 @@ function Home({ navigation }) {
 
           {account ? (
             <View>
+              <View style={globalStyles.screenHeader}>
+                <Text style={globalStyles.screenHeaderTitle}>
+                  account
+                  </Text>
+              </View>
+              <View style={globalStyles.screenHeaderIconRow}>
+                <TouchableOpacity
+                  style={styles.statusContainer}
+                  onPress={() => handleSignOut()}
+                >
+                  <MaterialIcons
+                    style={globalStyles.projectIcon}
+                    name="exit-to-app"
+                    size={40}
+                    color="coral"
+                  />
+                </TouchableOpacity>
+              </View>
               <Account />
             </View>
           ) : null}
 
           {projects ? (
             <View style={{ flex: 1 }}>
+            <View style={globalStyles.screenHeader}>
+                <Text style={globalStyles.screenHeaderTitle}>
+                  my projects
+                  </Text>
+              </View>
               <View style={globalStyles.screenHeaderIconRow}>
-                {newProjectForm ? 
-                <TouchableOpacity
-                  onPress={() => setNewProjectForm(false)}
-                >
-                  <MaterialIcons
-                    style={globalStyles.screenHeaderIcon}
-                    name="keyboard-arrow-left"
-                    size={40}
-                    color="coral"
-                  />
-                </TouchableOpacity> 
-                : 
-                <TouchableOpacity
-                      onPress={() => setNewProjectForm(true)}
-                    >
-                      <MaterialIcons
-                        style={globalStyles.screenHeaderIcon}
-                        name="add-circle-outline"
-                        size={40}
-                        color="coral"
-                      />
-                    </TouchableOpacity>
+                {newProjectForm ?
+                  <TouchableOpacity
+                    onPress={() => setNewProjectForm(false)}
+                  >
+                    <MaterialIcons
+                      style={globalStyles.screenHeaderIcon}
+                      name="keyboard-arrow-left"
+                      size={40}
+                      color="coral"
+                    />
+                  </TouchableOpacity>
+                  :
+                  <TouchableOpacity
+                    onPress={() => setNewProjectForm(true)}
+                  >
+                    <MaterialIcons
+                      style={globalStyles.screenHeaderIcon}
+                      name="add-circle-outline"
+                      size={40}
+                      color="coral"
+                    />
+                  </TouchableOpacity>
                 }
               </View>
               {newProjectForm ? (

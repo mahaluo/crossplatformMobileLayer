@@ -4,14 +4,17 @@ import { globalStyles } from "../styles/global";
 import { MaterialIcons } from "@expo/vector-icons";
 import moment from "moment";
 import Loading from '../components/loading';
+import { FlatList } from "react-native-gesture-handler";
+import FlatlistPublicProjectItem from "./flatlistPublicProjectItem";
 
 
-function PublicProjectFeed() {
+const PublicProjectFeed = (props) => {
 
   const [projectList, setProjectList] = useState();
   const [load, setLoad] = useState(true);
+  const [refresh, setRefresh] = useState(true);
   const [empty, setEmpty] = useState();
-
+  const [user, setUser] = useState(props.user);
 
   async function refreshPublicProjects() {
     setLoad(true);
@@ -32,56 +35,51 @@ function PublicProjectFeed() {
       console.log(publicList);
       console.log('got projects.. ');
       setProjectList(publicList);
-      setLoad(false);
     } catch (error) {
-      
       console.log(error);
-      setLoad(false);
     }
+
+    setLoad(false);
   }
 
   useEffect(() => {
 
-    refreshPublicProjects();
-   
-  }, [load])
+    try {
 
+      refreshPublicProjects();
+      setRefresh(false);
+    } catch (error) {
+      console.log(error);
+    }
+   
+  }, [refresh])
 
 
   return (
-    <View style={globalStyles.screenHeader}>
-      <Text style={globalStyles.screenHeaderTitle}> dashboard </Text>
-    
-      {projectList &&
-        projectList.map((project) => {
-          return (
-            <View style={styles.projectCard} key={project.id}>
-              <View style={styles.projectCardHeader}>
-                <Text style={styles.projectTitle}>{project.title}</Text>
-              </View>
+    <View style={{ flex: 1 }}>
+      {load ?   <Loading /> : 
+      <FlatList 
+      
+        data={projectList}
+        renderItem={({ item }) => (
+              <View style={globalStyles.projectCard}>
+                <FlatlistPublicProjectItem
+                  project={item}
+                  user={user}
+                  />
 
-              <View style={styles.projectCardContent}>
-                <Text>{project.body}</Text>
-              </View>
+                <View style={globalStyles.projectCardFooter}>
 
-              <View style={styles.projectIconColumn}>
-                <TouchableOpacity
-                  onPress={() => {
-                    deletePost(project.id);
-                  }}
-                >
-                  <MaterialIcons name="delete" size={40} color="coral" />
-                </TouchableOpacity>
-              </View>
+                  <View style={globalStyles.projectCreatedAt}>
+                    <Text style={globalStyles.smallText}>{item.createdAt}</Text>
+                  </View>
 
-              <View style={styles.projectCardFooter}>
-                <Text style={styles.projectCreated}>
-                  {moment(project.createdAt.toDate()).calendar()}
-                </Text>
+                </View>
+
               </View>
-            </View>
-          );
-        })}
+            )}
+      />}
+
     </View>
   );
 }

@@ -4,7 +4,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  SwipeableListView,
   FlatList
 } from "react-native";
 import { globalStyles } from "../../styles/global";
