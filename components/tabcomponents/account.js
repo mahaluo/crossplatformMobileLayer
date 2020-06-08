@@ -1,10 +1,22 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, Button, TouchableOpacity } from "react-native";
-import { globalStyles } from "../styles/global";
+import { globalStyles } from "../../styles/global";
 import { AntDesign } from "@expo/vector-icons";
 import * as firebase from "firebase";
 
 function Account({ navigation }) {
+
+  const [userid, setUserid] = useState();
+
+  useEffect(() => {
+    try {
+      setUserid(firebase.auth().currentUser.uid);
+      console.log('account tab set userid');
+    } catch (error) {
+      console.log(error);
+    }  
+  }, [userid])
+  
   const handleSignOut = () => {
     firebase
       .auth()

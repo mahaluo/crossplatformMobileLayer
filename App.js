@@ -24,6 +24,8 @@ firebase.initializeApp(firebaseConfig);
 const BottomTab = createBottomTabNavigator();
 
 function App() {
+
+
   return (
     <NavigationContainer>
       <BottomTab.Navigator>
@@ -32,7 +34,6 @@ function App() {
         <BottomTab.Screen name="contact" component={Contact} />
       </BottomTab.Navigator>
     </NavigationContainer>
-
     // <NavigationContainer>
     //   <Stack.Navigator>
     //     <Stack.Screen name="home" component={Home} />

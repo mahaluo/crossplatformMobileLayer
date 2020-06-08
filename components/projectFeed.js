@@ -5,66 +5,39 @@ import * as firebase from "firebase";
 import "firebase/firestore";
 import Loading from "./loading";
 import ProjectComments from '../components/projectComments';
+import { FlatList } from "react-native-gesture-handler";
+import { globalStyles } from "../styles/global";
 
-const ProjectFeed = (refresh) => {
+const ProjectFeed = (props) => {
 
-  const [storedProjects, setStoredProjects] = useState();
-  const [load, setLoad] = useState(refresh);
+  console.log('props from projects.js: ');
+  console.log(props.projectList);
+
+  const [storedProjects, setStoredProjects] = useState(props.projectList);
+  const [load, setLoad] = useState(true);
   const [userid, setUserid] = useState();
   const [comments, setComments] = useState();
   const [projectid, setProjectid] = useState();
 
- 
-  const refreshProjects = () => {
-
-    console.log("project feed refreshing");
-    setLoad(true);
-    
-    async function refreshFeed() {
-      
-      const userList = [];
-      const usersProject = await fetch("http://192.168.0.2:3000/user-projects", {
-        method: "GET",
-        headers: {
-          userid: userid,
-        },
-      });
-  
-      const jsonproject = await usersProject.json();
-      jsonproject.forEach((projectfound) => {
-        userList.push(projectfound.project);
-      });
-  
-      setStoredProjects(userList);
-    }
-
-    try {
-      refreshFeed().then(() => {
-        setLoad(false);
-      })
-    } catch (error) {
-      console.log(error);
-    }
-    
-  }
 
   useEffect(() => {
 
-
-    try {
-      setUserid(firebase.auth().currentUser.uid);
-    } catch (error) {
-      console.log(error);
-    }  
-
-
-    try {
-      refreshProjects();
-    } catch (error) {
-      console.log(error);
+    if(props.projectList) {
+      try {
+        props.projectList.forEach(project => {
+          console.log(project.title);
+        });
+        setLoad(false);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    else {
+      console.log('empty list from projects.. ');
+      setLoad(false);
     }
     
-  }, [userid]);
+  }, [load]);
 
 
   const showComments = (id) => {
@@ -84,32 +57,37 @@ const ProjectFeed = (refresh) => {
       if (solved) {
         firebase
         .firestore()
+        .collection("projectList")
+        .doc("projects")
         .collection(userid)
-        .doc("projectList")
-        .collection("projects")
         .doc(id)
         .update({'solved': false})
         .then(() => {
-          console.log("toggled project solved " + id);
+          console.log("toggled project solved to false");
         })
         .catch((err) => {
           console.log(err);
         });
+
       } else {
         firebase
         .firestore()
+        .collection("projectList")
+        .doc("projects")
         .collection(userid)
-        .doc("projectList")
-        .collection("projects")
         .doc(id)
         .update({'solved': true})
         .then(() => {
-          console.log("toggled project solved " + id);
+          console.log("toggled project solved to true");
         })
         .catch((err) => {
           console.log(err);
         });
       }
+
+
+
+
     }
 
    
@@ -122,25 +100,41 @@ const ProjectFeed = (refresh) => {
 
   };
 
-  const toggleShared = (id, shared) => {
-    console.log('toggling shared');
+  const toggleShared = (project) => {
+    console.log('toggling shared ' + project.shared);
     setLoad(true);
   
     async function toggle() {
-      if (shared) {
+      if (project.shared) {
         firebase
         .firestore()
+        .collection("projectList")
+        .doc("projects")
         .collection(userid)
-        .doc("projectList")
-        .collection("projects")
         .doc(id)
         .update({'shared': false})
         .then(() => {
-          console.log("toggled project shared " + id);
+          console.log("toggled project shared");
         })
         .catch((err) => {
           console.log(err);
         });
+
+        firebase
+        .firestore()
+        .collection('publicProjects')
+        .doc('projectList')
+        .collection(userid)
+        .doc(project.id)
+        .delete()
+        .then(() => {
+          console.log("removed project to public list ");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+
       }
       else {
         firebase
@@ -148,10 +142,29 @@ const ProjectFeed = (refresh) => {
         .collection(userid)
         .doc("projectList")
         .collection("projects")
-        .doc(id)
+        .doc(project.id)
         .update({'shared': true})
         .then(() => {
-          console.log("toggled project shared " + id);
+          console.log("toggled project shared");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+        firebase
+        .firestore()
+        .collection('publicProjects')
+        .doc('projectList')
+        .collection(userid)
+        .doc(project.id)
+        .set({
+          title: project.title,
+          body: project.body,
+          createdAt: project.createdAt,
+          solved: project.solved,
+        })
+        .then(() => {
+          console.log("added project to public list ");
         })
         .catch((err) => {
           console.log(err);
@@ -194,12 +207,12 @@ const ProjectFeed = (refresh) => {
   };
 
   return (
-    <View>
+   
       <View>
         {load ? (
           <Loading />
         ) : (
-          <View>
+          <View >
 
             {comments ? <View>
               <TouchableOpacity
@@ -217,136 +230,99 @@ const ProjectFeed = (refresh) => {
               <ProjectComments id={projectid}/>
             </View> : <View>
 
+              <FlatList 
+                data={storedProjects}
+                renderItem={({ item }) => (
 
-              {storedProjects &&
-              storedProjects.map((project) => {
-                return (
-                  <View style={styles.projectCard} key={project.id}>
-                    <View style={styles.projectCardHeader}>
-                      <Text style={styles.projectTitle}>{project.title}</Text>
+                  <View style={globalStyles.projectCard}>
+
+                    <View style={globalStyles.projectCardHeader}>
+                      <Text style={globalStyles.projectTitle}>{item.title}</Text>
                     </View>
 
-                    <View style={styles.projectCardContent}>
-                      <View style={styles.projectBody}>
+                    <View style={globalStyles.projectCardContent}>
+                      <View>
+                        <Text>{item.body}</Text>
+                      </View>
+                    </View>
 
-                      <Text>{project.body}</Text>
+                    <View style={globalStyles.projectCardFooter}>
+
+                      <View style={globalStyles.projectIconRow}>
+
+                          {item.solved ? <View> 
+                            <TouchableOpacity>
+                            <MaterialIcons style={globalStyles.projectIcon} name="check-box" size={24} color="coral" />
+                            </TouchableOpacity>
+                            <Text style={globalStyles.projectIconText}> solved </Text> 
+                         
+                          </View> : <View> 
+                          <TouchableOpacity>
+                            <MaterialIcons style={globalStyles.projectIcon} name="check-box-outline-blank" size={24} color="coral" />
+                            </TouchableOpacity>
+                            <Text style={globalStyles.projectIconText}> not solved </Text> 
+                            
+                          </View>}
+                        
+
+                          {item.shared ? <View> 
+                            <TouchableOpacity>
+                            <MaterialIcons style={globalStyles.projectIcon} name="screen-share" size={24} color="coral" />
+                            </TouchableOpacity>
+                            <Text style={globalStyles.projectIconText}> shared </Text> 
+                          
+                          </View> : <View> 
+                          <TouchableOpacity>
+                            <MaterialIcons style={globalStyles.projectIcon} name="stop-screen-share" size={24} color="coral" />
+                            </TouchableOpacity>
+                            <Text style={globalStyles.projectIconText}> not shared </Text> 
+                            
+                          </View>}
+
+                          <View> 
+                          <TouchableOpacity>
+                            <MaterialIcons style={globalStyles.projectIcon} name="comment" size={24} color="coral" />
+                            </TouchableOpacity>
+                            <Text style={globalStyles.projectIconText}> comments </Text> 
+                            
+                          </View>
+
+                          <View> 
+                          <TouchableOpacity>
+                            <MaterialIcons style={globalStyles.projectIcon} name="delete-forever" size={24} color="coral" />
+                            </TouchableOpacity>
+                            <Text style={globalStyles.projectIconText}> delete </Text> 
+                            
+                          </View>
+                        
+
+
+
                       </View>
                      
+                    
+                        <View style={globalStyles.projectCreatedAt}>
+                          <Text style={globalStyles.smallText}>{item.createdAt}</Text>
+                        </View>
 
-                      <View style={styles.editProjectIconCol}>
-                        <TouchableOpacity
-                         style={styles.iconBox}
-                          onPress={() => deletePost(project.id)}
-                        >
-                          <MaterialIcons
-                            style={styles.editProjectIcons}
-                            name="delete-forever"
-                            size={24}
-                            color="coral"
-                          />
-                           <Text style={styles.editProjectIconText}>delete</Text>
-                        </TouchableOpacity>
-
-                        {project.solved ? (
-                          <View>
-                            <TouchableOpacity
-                             style={styles.iconBox}
-                              onPress={() =>
-                                toggleSolved(project.id, project.solved)
-                              }
-                            >
-                              <MaterialIcons
-                                style={styles.editProjectIcons}
-                                name="check-box"
-                                size={24}
-                                color="coral"
-                              />
-                              <Text style={styles.editProjectIconText}>solved</Text>
-                            </TouchableOpacity>
-                            
-                          </View>
-                        ) : (
-                          <View>
-                            <TouchableOpacity
-                             style={styles.iconBox}
-                              onPress={() =>
-                                toggleSolved(project.id, project.solved)
-                              }
-                            >
-                              <MaterialIcons
-                                style={styles.editProjectIcons}
-                                name="check-box-outline-blank"
-                                size={24}
-                                color="coral"
-                              />
-                              <Text style={styles.editProjectIconText}>solved</Text>
-                            </TouchableOpacity>
-                            
-                          </View>
-                        )}
-
-                        <TouchableOpacity
-                         style={styles.iconBox}
-                          onPress={() => showComments(project.id)}
-                        >
-                          <MaterialIcons
-                            style={styles.editProjectIcons}
-                            name="chat"
-                            size={24}
-                            color="coral"
-                          />
-                           <Text style={styles.editProjectIconText}>comments</Text>
-                        </TouchableOpacity>
-
-                        {project.shared ? (
-                          <View>
-                            <TouchableOpacity
-                             style={styles.iconBox}
-                              onPress={() => toggleShared(project.id, project.shared)}
-                            >
-                              <MaterialIcons
-                                style={styles.editProjectIcons}
-                                name="screen-share"
-                                size={24}
-                                color="coral"
-                              />
-                              <Text style={styles.editProjectIconText}>shared</Text>
-                            </TouchableOpacity>
-                          </View>
-                        ) : (
-                          <View>
-                            <TouchableOpacity
-                            style={styles.iconBox}
-                              onPress={() => toggleShared(project.id, project.shared)}
-                            >
-                              <MaterialIcons
-                                style={styles.editProjectIcons}
-                                name="stop-screen-share"
-                                size={24}
-                                color="coral"
-                              />
-                              <Text style={styles.editProjectIconText}>not shared</Text>
-                            </TouchableOpacity>
-                          </View>
-                        )}
-                      </View>
+                    
                     </View>
+                 
 
-                    <View style={styles.projectCardFooter}>
-                      <Text style={styles.projectCreated}>
-                        {project.createdAt}
-                      </Text>
-                    </View>
                   </View>
-                );
-              })}
+                  
+                )}
+
+
+              />
+              
             </View> }
 
          
           </View>
         )}
       </View>
-    </View>
+    
   );
 };
 
@@ -396,7 +372,8 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 5,
     marginTop: 20,
-    alignItems: 'center'
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   editProjectIcons: {
     padding: 15,

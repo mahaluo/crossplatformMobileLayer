@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -14,10 +14,13 @@ import { globalStyles } from "../styles/global";
 import Loading from "../components/loading";
 import * as firebase from "firebase";
 import "firebase/firestore";
-import Account from "./account";
-import Projects from "./projects";
+import Account from "../components/tabcomponents/account";
+import Projects from "../components/tabcomponents/projects";
+import NewProject from "../components/newProject";
+import PublicProjectFeed from "../components/publicProjectFeed";
 import { MaterialIcons } from "@expo/vector-icons";
 import moment from "moment";
+import { FlatList } from "react-native-gesture-handler";
 
 
 function Home({ navigation }) {
@@ -29,10 +32,10 @@ function Home({ navigation }) {
   const [password, setPassword] = useState();
   const [registerEmail, setRegisterEmail] = useState();
   const [registerPassword, setRegisterPassword] = useState();
-  const [userid, setUserid] = useState();
+  const [user, setUser] = useState();
 
   //firebase
-  const [auth, setAuth] = useState();
+  const [auth, setAuth] = useState(false);
   const [error, setError] = useState(false);
 
   //register
@@ -48,22 +51,38 @@ function Home({ navigation }) {
   const [projects, setProjects] = useState(false);
   const [account, setAccount] = useState(false);
 
-  //my functions
+  //new project
+  const [newProjectForm, setNewProjectForm] = useState(false);
 
   const authUser = () => {
     setLoad(true);
 
-    setTimeout(() => {
-      firebase
-        .auth()
-        .signInWithEmailAndPassword(email, password)
-        .then(function (user) {
-          onLoginSuccess();
-        })
-        .catch(function (error) {
-          onLoginFailure(error);
+    async function auth() {
+      try {
+        const user = await fetch("http://192.168.0.2:3000/auth-user", {
+          method: "GET",
+          headers: {
+            email: email,
+            password: password,
+          },
         });
-    }, 1500);
+
+        const jsonUser = await user.json();
+        console.log("user: " + jsonUser + " signed in.. ");
+        setUser(jsonUser);
+        onLoginSuccess();
+      } catch (error) {
+        console.log(error);
+        onLoginFailure();
+      }
+    }
+
+    try {
+      auth();
+    } catch (error) {
+      console.log(error);
+      onLoginFailure();
+    }
   };
 
   const triggerModal = () => {
@@ -79,64 +98,32 @@ function Home({ navigation }) {
   const onLoginSuccess = () => {
     setEmail("");
     setPassword("");
-    setLoad(false);
     setAuth(true);
-    setTimeout(() => {
-      refreshPublicProjects();
-    }, 1000);
     console.log("login successful");
+    setLoad(false);
   };
 
-  const onLoginFailure = (error) => {
+  const onLoginFailure = () => {
     setEmail("");
     setPassword("");
     setAuth(false);
     setError(true);
-
-    console.log(error);
-
+    setTimeout(() => { }, 1500);
     setError(false);
-    setTimeout(() => {}, 500);
-
     setLoad(false);
   };
 
-  firebase.auth().onAuthStateChanged((user) => {
-    if (!user) {
-      setAuth(false);
-      setStoredProjects("");
-      setUserid("");
-      setProjects(false);
-      setAccount(false);
-      setHome(true);
-      console.log("user signed out");
-    } else {
-      setUserid(user.uid);
-    }
-  });
+  // useEffect(() => {
 
-  async function refreshPublicProjects() {
-    setLoad(true);
-    console.log("refreshing public project feed");
-    const publicList = [];
-    const publicProject = await fetch(
-      "http://192.168.0.2:3000/public-projects",
-      {
-        method: "GET",
-        headers: {
-          userid: userid,
-        },
-      }
-    );
+  //   try {
+  //     setTimeout(() => {
+  //       refreshPublicProjects();
+  //     }, 1000);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
 
-    const jsonproject = await publicProject.json();
-    jsonproject.forEach((projectfound) => {
-      publicList.push(projectfound.project);
-    });
-
-    setPublicProjects(publicList);
-    setLoad(false);
-  }
+  // }, [])
 
   const handleTabContent = (tab) => {
     if (tab === "projects") {
@@ -151,201 +138,242 @@ function Home({ navigation }) {
       setProjects(false);
       setAccount(false);
       setHome(true);
-      refreshPublicProjects();
     }
   };
 
   return (
-    <TouchableWithoutFeedback
-      onPress={() => {
-        Keyboard.dismiss();
-        console.log("outside press");
-      }}
-    >
-      <ScrollView>
-        {auth ? (
-          <View>
+
+    <View style={styles.container}>
+      {auth ? (
+        <View style={styles.container}>
+          <View style={styles.topNav}>
+            <TouchableOpacity
+              style={styles.topNavLinks}
+              onPress={() => handleTabContent("home")}
+            >
+              <Text>home</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.topNavLinks}
+              onPress={() => handleTabContent("projects")}
+            >
+              <Text>projects</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.topNavLinks}
+              onPress={() => handleTabContent("account")}
+            >
+              <Text>account</Text>
+            </TouchableOpacity>
+          </View>
+
+          {home ? (
             <View style={styles.container}>
-              <TouchableOpacity
-                style={styles.boxOne}
-                onPress={() => handleTabContent("home")}
-              >
-                <Text>home</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.boxOne}
-                onPress={() => handleTabContent("projects")}
-              >
-                <Text>projects</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.boxOne}
-                onPress={() => handleTabContent("account")}
-              >
-                <Text>account</Text>
-              </TouchableOpacity>
-            </View>
-
-            {home ? (
-              <View>
               <View style={globalStyles.screenHeader}>
-                      <Text style={globalStyles.screenHeaderTitle}>
-                        public projects
-                      </Text>
-                    </View>
-                {load ? (
-                  <Loading />
-                ) : (
+                <Text style={globalStyles.screenHeaderTitle}>
+                  public projects
+                  </Text>
+              </View>
+              {load ? (
+                <Loading />
+              ) : (
                   <View>
-                    
-                    {publicProjects &&
-                      publicProjects.map((project) => {
-                        return (
-                          <View style={styles.projectCard} key={project.id}>
-                            <View style={styles.projectCardHeader}>
-                              <Text style={styles.projectTitle}>
-                                {project.title}
-                              </Text>
-                            </View>
-
-                            <View style={styles.projectCardContent}>
-                              <Text>{project.body}</Text>
-                            </View>
-
-                            <View style={styles.projectIconColumn}></View>
-
-                            <View style={styles.projectCardFooter}>
-                              <Text style={styles.projectCreated}>
-                                {project.createdAt}
-                              </Text>
-                            </View>
-                          </View>
-                        );
-                      })}
+                    <PublicProjectFeed />
                   </View>
                 )}
+            </View>
+          ) : null}
+
+          {account ? (
+            <View>
+              <Account />
+            </View>
+          ) : null}
+
+          {projects ? (
+            <View style={{ flex: 1 }}>
+              <View style={globalStyles.screenHeaderIconRow}>
+                {newProjectForm ? 
+                <TouchableOpacity
+                  onPress={() => setNewProjectForm(false)}
+                >
+                  <MaterialIcons
+                    style={globalStyles.screenHeaderIcon}
+                    name="keyboard-arrow-left"
+                    size={40}
+                    color="coral"
+                  />
+                </TouchableOpacity> 
+                : 
+                <TouchableOpacity
+                      onPress={() => setNewProjectForm(true)}
+                    >
+                      <MaterialIcons
+                        style={globalStyles.screenHeaderIcon}
+                        name="add-circle-outline"
+                        size={40}
+                        color="coral"
+                      />
+                    </TouchableOpacity>
+                }
               </View>
-            ) : null}
+              {newProjectForm ? (
+                <ScrollView>
+                  <NewProject user={user} />
+                </ScrollView>
+              ) : (
+                  <Projects user={user} />
+                )}
 
-            {account ? <Account /> : null}
+            </View>
+          ) : null}
+        </View>
+      ) : (
+          <TouchableWithoutFeedback
+            onPress={() => {
+              Keyboard.dismiss();
+              console.log("outside press");
+            }}
+          >
+            <View style={styles.loginRegisterContainer}>
+              {registerOpen ? (
+                <View style={styles.loginContainer}>
+                  <Text style={globalStyles.titleText}>new user</Text>
 
-            {projects ? (
-              <Projects userid={userid} projects={storedProjects} />
-            ) : null}
-          </View>
-        ) : (
-          <View style={globalStyles.container}>
-            {registerOpen ? (
-              <View style={styles.loginContainer}>
-                <Text style={globalStyles.titleText}>new user</Text>
+                  <TextInput
+                    style={styles.loginField}
+                    placeholder="email"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    onChangeText={(val) => setRegisterEmail(val)}
+                    clearTextOnFocus={true}
+                    value={registerEmail}
+                  ></TextInput>
+                  <TextInput
+                    style={styles.loginField}
+                    placeholder="password"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    onChangeText={(val) => setRegisterPassword(val)}
+                    clearTextOnFocus={true}
+                    secureTextEntry={true}
+                    value={registerPassword}
+                  ></TextInput>
 
-                <TextInput
-                  style={styles.loginField}
-                  placeholder="email"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  onChangeText={(val) => setRegisterEmail(val)}
-                  clearTextOnFocus={true}
-                  value={registerEmail}
-                ></TextInput>
-                <TextInput
-                  style={styles.loginField}
-                  placeholder="password"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  onChangeText={(val) => setRegisterPassword(val)}
-                  clearTextOnFocus={true}
-                  secureTextEntry={true}
-                  value={registerPassword}
-                ></TextInput>
+                  <View style={styles.errorWindow} visible={false}>
+                    {load ? <Loading /> : null}
+                    {error ? (
+                      <Text style={globalStyles.errorText}>error</Text>
+                    ) : null}
+                  </View>
 
-                <View style={styles.errorWindow} visible={false}>
-                  {load ? <Loading /> : null}
-                  {error ? (
-                    <Text style={globalStyles.errorText}>error</Text>
-                  ) : null}
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity onPress={() => registerUser()}>
+                      <View style={globalStyles.coralBorderButton}>
+                        <Text style={globalStyles.coralBorderButtonText}>register</Text>
+                      </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => setRegisterOpen(false)}>
+                      <View style={globalStyles.coralBorderButton}>
+                        <Text style={globalStyles.coralBorderButtonText}>cancel</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
                 </View>
+              ) : (
+                  <View style={styles.loginContainer}>
+                    <Text style={globalStyles.titleText}>welcome</Text>
 
-                <View style={styles.loginButtons}>
-                  <TouchableOpacity onPress={() => registerUser()}>
-                    <Text style={styles.coralBorderButton}>register</Text>
-                  </TouchableOpacity>
+                    <TextInput
+                      style={styles.loginField}
+                      placeholder="email"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      onChangeText={(val) => setEmail(val)}
+                      clearTextOnFocus={true}
+                      value={email}
+                    ></TextInput>
+                    <TextInput
+                      style={styles.loginField}
+                      placeholder="password"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      onChangeText={(val) => setPassword(val)}
+                      clearTextOnFocus={true}
+                      secureTextEntry={true}
+                      value={password}
+                    ></TextInput>
 
-                  <TouchableOpacity onPress={() => setRegisterOpen(false)}>
-                    <Text style={styles.coralBorderButton}>cancel</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ) : (
-              <View style={styles.loginContainer}>
-                <Text style={globalStyles.titleText}>welcome</Text>
+                    <Text style={globalStyles.smallText}> forgot password? </Text>
 
-                <TextInput
-                  style={styles.loginField}
-                  placeholder="email"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  onChangeText={(val) => setEmail(val)}
-                  clearTextOnFocus={true}
-                  value={email}
-                ></TextInput>
-                <TextInput
-                  style={styles.loginField}
-                  placeholder="password"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  onChangeText={(val) => setPassword(val)}
-                  clearTextOnFocus={true}
-                  secureTextEntry={true}
-                  value={password}
-                ></TextInput>
+                    <View style={styles.errorWindow} visible={false}>
+                      {load ? <Loading /> : null}
+                      {error ? (
+                        <Text style={globalStyles.errorText}>error</Text>
+                      ) : null}
+                    </View>
 
-                <Text style={globalStyles.smallText}> forgot password? </Text>
+                    <View style={styles.buttonContainer}>
+                      <TouchableOpacity onPress={() => authUser()}>
+                        <View style={globalStyles.coralBorderButton}>
+                          <Text style={globalStyles.coralBorderButtonText}>sign in</Text>
+                        </View>
+                      </TouchableOpacity>
 
-                <View style={styles.errorWindow} visible={false}>
-                  {load ? <Loading /> : null}
-                  {error ? (
-                    <Text style={globalStyles.errorText}>error</Text>
-                  ) : null}
-                </View>
-
-                <View style={styles.loginButtons}>
-                  <TouchableOpacity onPress={() => authUser()}>
-                    <Text style={styles.coralBorderButton}>sign in</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity onPress={() => triggerModal()}>
-                    <Text style={styles.coralBorderButton}>register</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-          </View>
+                      <TouchableOpacity onPress={() => triggerModal()}>
+                        <View style={globalStyles.coralBorderButton}>
+                          <Text style={globalStyles.coralBorderButtonText}>register</Text>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+            </View>
+          </TouchableWithoutFeedback>
         )}
-      </ScrollView>
-    </TouchableWithoutFeedback>
+
+    </View>
+
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
+    paddingTop: 10,
+  },
+  topNav: {
     flexDirection: "row",
     justifyContent: "flex-end",
     backgroundColor: "#fff",
-    paddingTop: 20,
+    overflow: "hidden",
+  },
+  topNavLinks: {
+    backgroundColor: "#fff",
+    textAlign: "center",
+    padding: 14,
+    fontSize: 20,
+    borderColor: "coral",
+    borderBottomWidth: 2,
+  },
+  loginRegisterContainer: {
+    marginTop: 60,
   },
   loginContainer: {
     flexDirection: "column",
-    marginTop: 140,
+    alignSelf: 'center',
+    alignItems: "center",
     padding: 20,
+    marginVertical: 30,
     borderRadius: 10,
     borderColor: "coral",
     borderWidth: 2,
-    alignItems: "center",
   },
+
   loginField: {
     width: 200,
     marginHorizontal: 20,
@@ -353,16 +381,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     marginTop: 20,
   },
-  loginButtons: {},
-  coralBorderButton: {
-    width: 200,
-    height: 30,
-    borderWidth: 1,
-    borderColor: "coral",
-    borderRadius: 10,
-    textAlign: "center",
-    fontSize: 20,
-    marginBottom: 20,
+  buttonContainer: {
+    padding: 10,
   },
   errorWindow: {
     marginBottom: 20,

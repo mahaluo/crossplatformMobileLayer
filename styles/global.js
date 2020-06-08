@@ -3,11 +3,10 @@ import { StyleSheet } from "react-native";
 
 export const globalStyles = StyleSheet.create({
   container: {
-    alignItems: "center",
-    justifyContent: "center",
+    flex: 1,
   },
   screenHeader: {
-    paddingTop: 32,
+    paddingTop: 16,
     paddingBottom: 16,
     backgroundColor: "#fff",
     alignItems: "center",
@@ -23,7 +22,26 @@ export const globalStyles = StyleSheet.create({
   screenHeaderTitle: {
     fontSize: 20,
     fontWeight: "500",
-    marginBottom: 20,
+  },
+  screenHeaderIconRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  screenHeaderIcon: {
+    margin: 10,
+  },
+  coralBorderButton: {
+    width: 200,
+    height: 30,
+    borderWidth: 1,
+    borderColor: "coral",
+    borderRadius: 10,
+    justifyContent: 'center',
+    marginVertical: 10,
+  },
+  coralBorderButtonText: {
+    fontSize: 20,
+    textAlign: "center",
   },
   errorText: {
     color: "red",
@@ -42,4 +60,53 @@ export const globalStyles = StyleSheet.create({
     lineHeight: 20,
     color: "#ddd",
   },
+  projectFlatList: {
+    justifyContent: 'center',
+    alignContent: 'center',
+  },
+  projectCard: {
+    borderColor: "coral",
+    borderWidth: 2,
+    borderRadius: 10,
+    marginHorizontal: 15,
+    marginVertical: 15,
+  },
+  projectCardHeader: {
+    minHeight: 20,
+    marginTop: 20,
+    marginHorizontal: 16,
+    borderBottomColor: 'coral',
+    borderBottomWidth: 1,
+  },
+  projectTitle: {
+    alignSelf: "center",
+    fontSize: 20,
+  },
+  projectCardContent: {
+    minHeight: 300,
+    paddingHorizontal: 10,
+    paddingTop: 20,
+    flexDirection: 'row',
+    justifyContent: "space-evenly"
+  },
+  projectCardFooter: {
+    justifyContent: 'center',
+  },
+  projectIconRow: {
+    paddingBottom: 16,
+    paddingHorizontal: 30,
+    flexDirection: "row",
+    justifyContent: 'space-around',
+  },
+  projectIcon: {
+    textAlign: 'center',
+    marginHorizontal: 10,
+  },
+  projectIconText: {
+    textAlign: 'center',
+    marginHorizontal: 10,
+  },
+  projectCreatedAt: {
+    padding: 10,
+  }
 });
