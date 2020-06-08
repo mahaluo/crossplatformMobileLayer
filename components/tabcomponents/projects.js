@@ -14,9 +14,7 @@ import * as firebase from "firebase";
 import "firebase/firestore";
 
 const Projects = (props) => {
-  console.log("user passed from home: " + props.user);
 
-  const [refresh, setRefresh] = useState(true);
   const [userProjects, setUserProjects] = useState();
   const [load, setLoad] = useState(false);
   const [user, setUser] = useState(props.user);
@@ -43,7 +41,6 @@ const Projects = (props) => {
       jsonproject.forEach((projectfound) => {
         userList.push(projectfound.project);
       });
-      console.log('projects fetched: ' + userList);
       setUserProjects(userList);
     }
 
@@ -92,11 +89,10 @@ const Projects = (props) => {
   useEffect(() => {
     try {
       refreshProjects();
-      setRefresh(false);
     } catch (error) {
       console.log(error);
     }
-  }, [refresh]);
+  }, [user]);
 
   return (
     <View style={{ flex: 1 }}>

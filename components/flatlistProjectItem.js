@@ -12,8 +12,7 @@ import * as firebase from "firebase";
 import "firebase/firestore";
 
 const FlatListProjectItem = (props) => {
-    console.log("user passed from props: " + props.user);
-    console.log('list passed from props' +  JSON.stringify(props.project));
+ 
     const [solved, setSolved] = useState(props.project.solved);
     const [shared, setShared] = useState(props.project.shared);
     const [comments, setComments] = useState(false);
@@ -24,7 +23,7 @@ const FlatListProjectItem = (props) => {
     const [emptyComments, setEmptyComments] = useState();
 
     const toggleSolved = (id) => {
-        console.log('toggle solved');
+       
         setLoadSolved(true);
         setTimeout(() => {
             if (solved) {
@@ -68,7 +67,7 @@ const FlatListProjectItem = (props) => {
     }
 
     const toggleShared = (id) => {
-        console.log('toggle shared');
+       
         setLoadShared(true);
         setTimeout(() => {
             if (shared) {
@@ -112,7 +111,7 @@ const FlatListProjectItem = (props) => {
     }
 
     const toggleComments = (id) => {
-        console.log('toggle comments');
+      
         setLoadComments(true);
         setTimeout(() => {
             if (comments) {

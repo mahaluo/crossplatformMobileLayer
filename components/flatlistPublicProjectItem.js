@@ -13,8 +13,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Loading from '../components/loading';
 
 const FlatlistPublicProjectItem = (props) => {
-    console.log("user passed from props: " + props.user);
-    console.log('project title passed from props ' + JSON.stringify(props.project.title));
+    console.log('public project flatlist item rendering.. ');
     const [comments, setComments] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [newComment, setNewComment] = useState();
@@ -25,7 +24,6 @@ const FlatlistPublicProjectItem = (props) => {
     const [user, setUser] = useState(props.user);
 
     const toggleComments = (id) => {
-        console.log('toggle comments');
         setLoadComments(true);
         setTimeout(() => {
             if (comments) {
@@ -87,13 +85,11 @@ const FlatlistPublicProjectItem = (props) => {
     }
 
     useEffect(() => {
-        console.log('modal toggled');
         setNewComment('');
         setLoad(false);
 
         async function getComments() {
             const commentList = [];
-            console.log("fetching comments for project: " + props.project.id);
             const projectComments = await fetch(
                 "http://192.168.0.2:3000/project-comments",
                 {

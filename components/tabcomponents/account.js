@@ -10,7 +10,7 @@ const Account = (props) => {
   return (
     <View>
     <Text>acc body</Text>
-   
+    
     </View>
   );
 }

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, Button, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { globalStyles } from "../styles/global";
-import { MaterialIcons } from "@expo/vector-icons";
-import moment from "moment";
 import Loading from '../components/loading';
 import { FlatList } from "react-native-gesture-handler";
 import FlatlistPublicProjectItem from "./flatlistPublicProjectItem";
@@ -12,9 +10,7 @@ const PublicProjectFeed = (props) => {
 
   const [projectList, setProjectList] = useState();
   const [load, setLoad] = useState(true);
-  const [refresh, setRefresh] = useState(true);
-  const [empty, setEmpty] = useState();
-  const [user, setUser] = useState(props.user);
+  const [user, setUser] = useState();
 
   async function refreshPublicProjects() {
     setLoad(true);
@@ -32,8 +28,6 @@ const PublicProjectFeed = (props) => {
       jsonproject.forEach((projectfound) => {
         publicList.push(projectfound.project);
       });
-      console.log(publicList);
-      console.log('got projects.. ');
       setProjectList(publicList);
     } catch (error) {
       console.log(error);
@@ -43,16 +37,14 @@ const PublicProjectFeed = (props) => {
   }
 
   useEffect(() => {
-
+    setUser(props.user);
     try {
-
       refreshPublicProjects();
-      setRefresh(false);
     } catch (error) {
       console.log(error);
     }
    
-  }, [refresh])
+  }, [user])
 
 
   return (

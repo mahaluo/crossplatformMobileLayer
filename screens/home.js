@@ -8,20 +8,18 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
-  Modal,
+  AsyncStorage
 } from "react-native";
+
 import { globalStyles } from "../styles/global";
-import Loading from "../components/loading";
+import { MaterialIcons } from "@expo/vector-icons";
 import * as firebase from "firebase";
 import "firebase/firestore";
+import Loading from "../components/loading";
 import Account from "../components/tabcomponents/account";
 import Projects from "../components/tabcomponents/projects";
 import NewProject from "../components/newProject";
 import PublicProjectFeed from "../components/publicProjectFeed";
-import { MaterialIcons } from "@expo/vector-icons";
-
-import moment from "moment";
-import { FlatList } from "react-native-gesture-handler";
 
 
 function Home({ navigation }) {
@@ -41,6 +39,9 @@ function Home({ navigation }) {
 
   //register
   const [registerOpen, setRegisterOpen] = useState(false);
+
+  //remember me
+  const [checked, setChecked] = useState(false);
 
   //tabs
   const [home, setHome] = useState(true);
@@ -102,6 +103,7 @@ function Home({ navigation }) {
     setPassword("");
     setAuth(true);
     console.log("login successful");
+    storeToken();
     setLoad(false);
   };
 
@@ -116,10 +118,41 @@ function Home({ navigation }) {
   };
 
   useEffect(() => {
+    if (checked) {
+      getToken();
+    }
 
     console.log('auth state changed.. ');
-
   }, [auth]);
+
+  async function storeToken() {
+    try {
+      if(checked) {
+        await AsyncStorage.setItem("user", email);
+        console.log('user checked remember me.. ' + email);
+      }
+      else {
+        console.log('user did not check remember me.. ');
+      }
+      
+    } catch (error) {
+      console.log("something bad happened", error);
+    }
+  }
+
+  async function getToken() {
+    try {
+      let userData = await AsyncStorage.getItem("user");
+      console.log('found remembered user.. ' + userData);
+      if (userData) {
+        setChecked(true);
+        setEmail(userData);
+      }
+      
+    } catch (error) {
+      console.log("something bad happened", error);
+    }
+  }
 
   const handleTabContent = (tab) => {
     if (tab === "projects") {
@@ -149,9 +182,9 @@ function Home({ navigation }) {
         console.log(error);
       });
 
-      setAccount(false);
-      setProjects(false);
-      setHome(true);
+    setAccount(false);
+    setProjects(false);
+    setHome(true);
   };
 
 
@@ -184,7 +217,7 @@ function Home({ navigation }) {
           </View>
 
           {home ? (
-            <View style={styles.container}>
+            <View style={{flex: 1}}>
               <View style={globalStyles.screenHeader}>
                 <Text style={globalStyles.screenHeaderTitle}>
                   public projects
@@ -226,7 +259,7 @@ function Home({ navigation }) {
 
           {projects ? (
             <View style={{ flex: 1 }}>
-            <View style={globalStyles.screenHeader}>
+              <View style={globalStyles.screenHeader}>
                 <Text style={globalStyles.screenHeaderTitle}>
                   my projects
                   </Text>
@@ -344,7 +377,19 @@ function Home({ navigation }) {
                       value={password}
                     ></TextInput>
 
-                    <Text style={globalStyles.smallText}> forgot password? </Text>
+                    <View style={{ flexDirection: 'row', marginTop: 10 }}>
+
+                      {checked ?
+                        <TouchableOpacity onPress={() => setChecked(!checked)}>
+                          <MaterialIcons name="check-box" size={18} color="black" />
+                        </TouchableOpacity>
+                        :
+                        <TouchableOpacity onPress={() => setChecked(!checked)}>
+                          <MaterialIcons name="check-box-outline-blank" size={18} color="black" />
+                        </TouchableOpacity>}
+
+                      <Text style={globalStyles.smallText}> remember me </Text>
+                    </View>
 
                     <View style={styles.errorWindow} visible={false}>
                       {load ? <Loading /> : null}
