@@ -9,12 +9,8 @@ import {
 } from "react-native";
 import { globalStyles } from "../../styles/global";
 import { MaterialIcons } from "@expo/vector-icons";
-import firebase from 'firebase';
-import "firebase/firestore";
 import FlatListCommentItem from '../flatlistItems/flatlistCommentItem';
 
-
-//need to move toggle shared and toggle solved to middle layer
 
 const FlatListProjectItem = (props) => {
 
@@ -23,6 +19,8 @@ const FlatListProjectItem = (props) => {
     const [shared, setShared] = useState(props.project.shared);
     const [loadSolved, setLoadSolved] = useState(false);
     const [loadShared, setLoadShared] = useState(false);
+    const [errorSolved, setErrorSolved] = useState(false);
+    const [errorShared, setErrorShared] = useState(false);
 
     //comments
     const [comments, setComments] = useState(false);
@@ -30,99 +28,77 @@ const FlatListProjectItem = (props) => {
     const [listComments, setListComments] = useState();
     const [emptyComments, setEmptyComments] = useState();
 
-    //toggles if solved is true or not
-    const toggleSolved = (id) => {
+    //toggles project shared/solved state is true or not
+    const toggle = (sender, state) => {
 
-        setLoadSolved(true);
-        setTimeout(() => {
-            if (solved) {
-                setSolved(false);
-                firebase
-                    .firestore()
-                    .collection("projectList")
-                    .doc("projects")
-                    .collection('users')
-                    .doc(props.user)
-                    .collection('userproject')
-                    .doc(id)
-                    .update({ 'solved': false })
-                    .then(() => {
-                        console.log("toggled project solved to false");
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
-            }
-            else {
-                setSolved(true);
-                firebase
-                    .firestore()
-                    .collection("projectList")
-                    .doc("projects")
-                    .collection('users')
-                    .doc(props.user)
-                    .collection('userproject')
-                    .doc(id)
-                    .update({ 'solved': true })
-                    .then(() => {
-                        console.log("toggled project solved to true");
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
-            }
-            setLoadSolved(false);
-        }, 1200);
-    }
+        if (sender === 'solved') {
+            setLoadSolved(true);
+        }
+        else if (sender === 'shared') {
+            setLoadShared(true);
+        }
+        async function toggleSender() {
+            console.log("toggling solved for project: " + props.project.id);
+            console.log('toggle sender: ' + sender + " state: " + state);
+            let result = await fetch(
+                "http://192.168.0.2:3000/toggle-project",
+                {
+                    method: "GET",
+                    headers: {
+                        user: props.user,
+                        id: props.project.id,
+                        sender: sender,
+                        boolean: state
+                    },
+                }
+            ).catch((error) => {
+                console.log(error);
+            })
 
-    //toggles if shared is true or not
-    const toggleShared = (id) => {
-
-        setLoadShared(true);
-        setTimeout(() => {
-            try {
-                if (shared) {
-                    setShared(false);
-                    firebase
-                        .firestore()
-                        .collection("projectList")
-                        .doc("projects")
-                        .collection('users')
-                        .doc(props.user)
-                        .collection('userproject')
-                        .doc(id)
-                        .update({ 'shared': false })
-                        .then(() => {
-                            console.log("toggled project shared to false");
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                        });
+            if (result) {
+                let jsonResult = await result.json();
+                if (jsonResult.success) {
+                    if (sender === 'solved') {
+                        setSolved(!solved);
+                        setLoadSolved(false);
+                    }
+                    else if (sender === 'shared') {
+                        setShared(!shared);
+                        setLoadShared(false);
+                    }
                 }
                 else {
-                    setShared(true);
-                    firebase
-                        .firestore()
-                        .collection("projectList")
-                        .doc("projects")
-                        .collection('users')
-                        .doc(props.user)
-                        .collection('userproject')
-                        .doc(id)
-                        .update({ 'shared': true })
-                        .then(() => {
-                            console.log("toggled project shared to true");
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                        });
+                    console.log(jsonResult);
                 }
-                setLoadShared(false);
+
+            }
+            else {
+                console.log('something bad happened.. ');
+                if (sender === 'solved') {
+                    setLoadSolved(false);
+                    setErrorSolved(true);
+                }
+                else if (sender == 'shared') {
+                    setLoadShared(false);
+                    setErrorShared(true);
+                }
+
+                setTimeout(() => {
+                    setErrorSolved(false);
+                    setErrorShared(false);
+                }, 500);
+            }
+        }
+
+        setTimeout(() => {
+
+            try {
+                toggleSender();
             } catch (error) {
                 console.error(error);
             }
-           
-        }, 1200);
+
+        }, 800);
     }
 
     //toggle to show comments or project body
@@ -213,42 +189,49 @@ const FlatListProjectItem = (props) => {
 
             <View style={globalStyles.projectIconRow}>
                 <View>
-                    <TouchableOpacity onPress={() => toggleSolved(props.project.id)}>
-                        {loadSolved ? <ActivityIndicator size="small" /> : <View>
+                    <TouchableOpacity onPress={() => toggle('solved', solved)}>
+                        {loadSolved ? <ActivityIndicator size="small" /> :
+                            <View>
+                                {errorSolved ? <MaterialIcons style={globalStyles.projectIcon} name="error" size={24} color="red" /> : <View>
 
-                            {solved ? <MaterialIcons
-                                style={globalStyles.projectIcon}
-                                name="check-box"
-                                size={24}
-                                color="green"
-                            /> : <MaterialIcons
+                                    {solved ? <MaterialIcons
                                     style={globalStyles.projectIcon}
-                                    name="check-box-outline-blank"
+                                    name="check-box"
                                     size={24}
-                                    color="gray"
-                                />}
-                        </View>}
-
+                                    color="green"
+                                /> : <MaterialIcons
+                                        style={globalStyles.projectIcon}
+                                        name="check-box-outline-blank"
+                                        size={24}
+                                        color="gray"
+                                    />}
+                                </View>}
+                            </View>}
                     </TouchableOpacity>
                     <Text style={globalStyles.projectIconText}> solved </Text>
                 </View>
 
                 <View>
-                    <TouchableOpacity onPress={() => toggleShared(props.project.id)}>
+                    <TouchableOpacity onPress={() => toggle('shared', shared)}>
                         {loadShared ? <View>
                             <ActivityIndicator size="small" />
                         </View> : <View>
-                                {shared ? <MaterialIcons
-                                    style={globalStyles.projectIcon}
-                                    name="screen-share"
-                                    size={24}
-                                    color="green"
-                                /> : <MaterialIcons
-                                        style={globalStyles.projectIcon}
-                                        name="stop-screen-share"
-                                        size={24}
-                                        color="gray"
-                                    />}
+
+                                {errorShared ? <MaterialIcons style={globalStyles.projectIcon} name="error" size={24} color="red" /> :
+                                    <View>
+                                        {shared ? <MaterialIcons
+                                            style={globalStyles.projectIcon}
+                                            name="screen-share"
+                                            size={24}
+                                            color="green"
+                                        /> : <MaterialIcons
+                                                style={globalStyles.projectIcon}
+                                                name="stop-screen-share"
+                                                size={24}
+                                                color="gray"
+                                            />}
+                                    </View>}
+
                             </View>}
 
                     </TouchableOpacity>

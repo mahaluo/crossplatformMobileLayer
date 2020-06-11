@@ -8,7 +8,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as firebase from "firebase";
 import { firebaseConfig } from "./config";
 
-
 firebase.initializeApp(firebaseConfig);
 
 const BottomTab = createBottomTabNavigator();
