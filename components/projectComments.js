@@ -1,17 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { StyleSheet, Text, View } from "react-native";
 import * as firebase from "firebase";
 import "firebase/firestore";
 import Loading from "./loading";
 import { globalStyles } from "../styles/global";
 
+//need to find a better way of rendering all the comments, 
+//find out if nesting flatlists is possible or not, nesting scrollview and flatlist not good?
+
 const ProjectComments = ({ id }) => {
+
+  //use load while getting comments from middle layer
   const [load, setLoad] = useState();
+
+  //put list of comments in here
   const [comments, setComments] = useState();
+
+  //use this to get comments from the right project
   const [projectid, setProjectid] = useState();
+
+  //set user id if comments are from personal page
   const [userid, setUserid] = useState();
 
+  //refresh feed of comments, would be nice to have this in flatlist but cant nest flatlists for now
   const refreshFeed = () => {
     console.log("fetching comments");
     setLoad(true);
@@ -46,6 +57,7 @@ const ProjectComments = ({ id }) => {
     }
   };
 
+  //useEffect, should stop from rendering too many times error
   useEffect(() => {
 
     try {

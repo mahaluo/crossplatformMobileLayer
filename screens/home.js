@@ -10,7 +10,6 @@ import {
   Keyboard,
   AsyncStorage
 } from "react-native";
-
 import { globalStyles } from "../styles/global";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as firebase from "firebase";
@@ -51,6 +50,7 @@ function Home({ navigation }) {
   //new project
   const [newProjectForm, setNewProjectForm] = useState(false);
 
+  //authenticate user, send request to middle layer
   const authUser = () => {
     setLoad(true);
 
@@ -88,6 +88,7 @@ function Home({ navigation }) {
     }
   };
 
+  //toggles between register and login stuff
   const triggerModal = () => {
     if (registerOpen) {
       setRegisterOpen(false);
@@ -98,6 +99,7 @@ function Home({ navigation }) {
     console.log("modal toggle" + registerOpen);
   };
 
+  //auth request was successful
   const onLoginSuccess = () => {
     setEmail("");
     setPassword("");
@@ -107,6 +109,7 @@ function Home({ navigation }) {
     setLoad(false);
   };
 
+  //auth request returned a failure
   const onLoginFailure = () => {
     setEmail("");
     setPassword("");
@@ -117,6 +120,7 @@ function Home({ navigation }) {
     setLoad(false);
   };
 
+  //useEffect to stop it from rendering 1000 times, not 100% sure how useEffect works 
   useEffect(() => {
     if (checked) {
       getToken();
@@ -125,6 +129,7 @@ function Home({ navigation }) {
     console.log('auth state changed.. ');
   }, [auth]);
 
+  //store token in localstorage if user wants to be remembered
   async function storeToken() {
     try {
       if(checked) {
@@ -140,6 +145,7 @@ function Home({ navigation }) {
     }
   }
 
+  //check if user wanted to be remembered, get credentials from localstorage
   async function getToken() {
     try {
       let userData = await AsyncStorage.getItem("user");
@@ -154,6 +160,7 @@ function Home({ navigation }) {
     }
   }
 
+  //switches content on home screen based on which tab is clicked
   const handleTabContent = (tab) => {
     if (tab === "projects") {
       setHome(false);
@@ -170,6 +177,7 @@ function Home({ navigation }) {
     }
   };
 
+  //sign out user from account screen
   const handleSignOut = () => {
     firebase
       .auth()

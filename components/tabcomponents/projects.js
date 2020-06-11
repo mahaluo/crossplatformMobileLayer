@@ -13,6 +13,10 @@ import FlatlistProjectItem from '../flatlistProjectItem';
 import * as firebase from "firebase";
 import "firebase/firestore";
 
+
+//needs an alert or something before a project gets deleted
+//projects are deleted without any feedback currently
+
 const Projects = (props) => {
 
   const [userProjects, setUserProjects] = useState();
@@ -20,6 +24,7 @@ const Projects = (props) => {
   const [user, setUser] = useState(props.user);
 
 
+  //refresh list of users projects
   const refreshProjects = () => {
     console.log("project feed refreshing.. ");
     setLoad(true);
@@ -57,7 +62,7 @@ const Projects = (props) => {
     }
   };
 
-
+  //delete project
   const deleteItem = (id) => {
 
     console.log('filtering project list.. ');
@@ -86,6 +91,7 @@ const Projects = (props) => {
     deleteProject();
   }
 
+  //should stop from rendering too many times
   useEffect(() => {
     try {
       refreshProjects();

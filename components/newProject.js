@@ -13,9 +13,17 @@ import "firebase/firestore";
 import Loading from "./loading";
 import { globalStyles } from "../styles/global";
 
+
+//need to add some type of alert or something that notifies user after creating a new project
+
+//need to move new project to middle layer, it does it in createNewProject function currently
+
 const NewProject = (props) => {
 
+  //new project function, get user id from props
   console.log("user passed from props: " + props.user);
+
+  //use load while setting up content
   const [load, setLoad] = useState(true);
   const [newProjectTitle, setNewProjectTitle] = useState();
   const [newProjectBody, setNewProjectBody] = useState();
@@ -28,6 +36,7 @@ const NewProject = (props) => {
 
   }, [load])
 
+  //send new project information to firebase
   const createNewProject = () => {
     setLoad(true);
 
@@ -62,6 +71,7 @@ const NewProject = (props) => {
     setNewProjectBody("");
   };
 
+  //clear all text boxes 
   const clearNewProjectBody = () => {
     setNewProjectTitle("");
     setNewProjectBody("");

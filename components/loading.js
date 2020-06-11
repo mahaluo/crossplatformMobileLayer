@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { StyleSheet, Text, View, Button, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import { globalStyles } from '../styles/global';
 
+//using this component to display an activityindicator whenever loading content 
 function Loading() {
 
     return (

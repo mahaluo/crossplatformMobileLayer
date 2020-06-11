@@ -4,7 +4,6 @@ import {
     Text,
     View,
     TouchableOpacity,
-    ActivityIndicator,
     Modal,
     TextInput
 } from "react-native";
@@ -14,15 +13,23 @@ import Loading from '../components/loading';
 
 const FlatlistPublicProjectItem = (props) => {
     console.log('public project flatlist item rendering.. ');
+
+    //comments 
     const [comments, setComments] = useState(false);
+    //trigger modal for entering a new comment
     const [modalVisible, setModalVisible] = useState(false);
     const [newComment, setNewComment] = useState();
     const [loadComments, setLoadComments] = useState(false);
     const [listComments, setListComments] = useState();
     const [emptyComments, setEmptyComments] = useState();
+
+    //load
     const [load, setLoad] = useState(false);
+
+    //get user id incase they add a comment somewhere
     const [user, setUser] = useState(props.user);
 
+    //toggle between showing project body or list of comments
     const toggleComments = (id) => {
         setLoadComments(true);
         setTimeout(() => {
@@ -36,6 +43,7 @@ const FlatlistPublicProjectItem = (props) => {
         }, 1200);
     }
 
+    //add new comment to project
     const addComment = (id) => {
         setLoad(true);
         console.log("adding comment to project: " + id);
@@ -84,6 +92,7 @@ const FlatlistPublicProjectItem = (props) => {
         }
     }
 
+    //should stop from rendering too many times
     useEffect(() => {
         setNewComment('');
         setLoad(false);

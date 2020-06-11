@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { StyleSheet, Text, View, Button, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { globalStyles } from '../styles/global'
 
-
+//contact screen, need to add component so user can send message or ask question
 function Contact() {
     return (
         <View >

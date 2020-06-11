@@ -11,17 +11,24 @@ import { MaterialIcons } from "@expo/vector-icons";
 import * as firebase from "firebase";
 import "firebase/firestore";
 
+
+//need to move toggle shared and toggle solved to middle layer
+
 const FlatListProjectItem = (props) => {
  
+    //project variables
     const [solved, setSolved] = useState(props.project.solved);
     const [shared, setShared] = useState(props.project.shared);
-    const [comments, setComments] = useState(false);
     const [loadSolved, setLoadSolved] = useState(false);
     const [loadShared, setLoadShared] = useState(false);
+
+    //comments
+    const [comments, setComments] = useState(false);
     const [loadComments, setLoadComments] = useState(false);
     const [listComments, setListComments] = useState();
     const [emptyComments, setEmptyComments] = useState();
 
+    //toggles if solved is true or not
     const toggleSolved = (id) => {
        
         setLoadSolved(true);
@@ -66,6 +73,7 @@ const FlatListProjectItem = (props) => {
         }, 1200);
     }
 
+    //toggles if shared is true or not
     const toggleShared = (id) => {
        
         setLoadShared(true);
@@ -110,6 +118,7 @@ const FlatListProjectItem = (props) => {
         }, 1200);
     }
 
+    //toggle to show comments or project body
     const toggleComments = (id) => {
       
         setLoadComments(true);

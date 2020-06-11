@@ -8,10 +8,16 @@ import FlatlistPublicProjectItem from "./flatlistPublicProjectItem";
 
 const PublicProjectFeed = (props) => {
 
+  //list of public projects for flatlist stored here
   const [projectList, setProjectList] = useState();
+
+  //set load to true while fetching list of projects from middle layer
   const [load, setLoad] = useState(true);
+
+  //set user credentials
   const [user, setUser] = useState();
 
+  //refresh the feed of public projects
   async function refreshPublicProjects() {
     setLoad(true);
     console.log("refreshing public project feed.. ");
@@ -36,6 +42,7 @@ const PublicProjectFeed = (props) => {
     setLoad(false);
   }
 
+  //useEffect, should stop it from rendering too many times
   useEffect(() => {
     setUser(props.user);
     try {

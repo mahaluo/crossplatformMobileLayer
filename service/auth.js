@@ -1,6 +1,7 @@
 import * as firebase from "firebase";
 import "firebase/firestore";
 
+//old auth component, need to replace with the new one that requests from middle layer
 export async function RegisterUser(email, password) {
   console.log("registering user... ");
   console.log(email);
