@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   FlatList
 } from "react-native";
-import { globalStyles } from "../../styles/global";
+import { globalStyles } from "../../../styles/global";
 import { MaterialIcons } from "@expo/vector-icons";
-import Loading from "../loading";
-import FlatlistProjectItem from '../flatlistProjectItem';
+import Loading from "../../loading";
+import FlatlistProjectItem from '../../flatlistItems/flatlistProjectItem';
 import * as firebase from "firebase";
 import "firebase/firestore";
 
@@ -55,8 +55,6 @@ const Projects = (props) => {
           setLoad(false);
         }, 1500);
       });
-
-
     } catch (error) {
       console.log(error);
     }
@@ -132,9 +130,6 @@ const Projects = (props) => {
 
               </View>
             )}
-
-
-
           />
         )}
     </View>

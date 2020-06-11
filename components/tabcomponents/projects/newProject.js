@@ -10,8 +10,8 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import * as firebase from "firebase";
 import "firebase/firestore";
-import Loading from "./loading";
-import { globalStyles } from "../styles/global";
+import Loading from "../../loading";
+import { globalStyles } from "../../../styles/global";
 
 
 //need to add some type of alert or something that notifies user after creating a new project

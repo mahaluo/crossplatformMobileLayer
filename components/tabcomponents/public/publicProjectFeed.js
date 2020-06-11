@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { globalStyles } from "../styles/global";
-import Loading from '../components/loading';
+import { globalStyles } from "../../../styles/global";
+import Loading from '../../loading';
 import { FlatList } from "react-native-gesture-handler";
-import FlatlistPublicProjectItem from "./flatlistPublicProjectItem";
+import FlatlistPublicProjectItem from "../../flatlistItems/flatlistPublicProjectItem";
 
 
 const PublicProjectFeed = (props) => {
@@ -12,72 +12,99 @@ const PublicProjectFeed = (props) => {
   const [projectList, setProjectList] = useState();
 
   //set load to true while fetching list of projects from middle layer
-  const [load, setLoad] = useState(true);
+  const [load, setLoad] = useState();
+  const [didLoad, setDidLoad] = useState(false);
 
   //set user credentials
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(props.user);
 
   //refresh the feed of public projects
-  async function refreshPublicProjects() {
+  const refreshPublicProjects = () => {
+    console.log('public projects refreshing.. ');
     setLoad(true);
-    console.log("refreshing public project feed.. ");
-    const publicList = [];
-    try {
-      const publicProject = await fetch(
-        "http://192.168.0.2:3000/public-projects",
-        {
-          method: "GET",
-        }
-      );
+    let loadCount = 0;
 
-      const jsonproject = await publicProject.json();
-      jsonproject.forEach((projectfound) => {
-        publicList.push(projectfound.project);
-      });
-      setProjectList(publicList);
+    async function refreshFeed() {
+      const publicList = [];
+      try {
+        const publicProject = await fetch(
+          "http://192.168.0.2:3000/public-projects",
+          {
+            method: "GET",
+          }
+        );
+
+        const jsonproject = await publicProject.json();
+
+        jsonproject.forEach((projectfound) => {
+          publicList.push(projectfound.project);
+        });
+
+        if (publicList.length > 0) {
+          setProjectList(publicList);
+        }
+        else {
+          console.log('no public projects found..');
+          console.log('trying again..');
+          loadCount++;
+          if (loadCount == 3) { 
+            setDidLoad(true);
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    try {
+      refreshFeed().then(() => {
+        setTimeout(() => {
+          setLoad(false);
+          setDidLoad(true);
+        }, 800);
+      })
     } catch (error) {
       console.log(error);
     }
-
-    setLoad(false);
   }
+
 
   //useEffect, should stop it from rendering too many times
   useEffect(() => {
-    setUser(props.user);
+
     try {
       refreshPublicProjects();
     } catch (error) {
       console.log(error);
     }
-   
-  }, [user])
+
+  }, [didLoad])
 
 
   return (
     <View style={{ flex: 1 }}>
-      {load ?   <Loading /> : 
-      <FlatList 
-      
-        data={projectList}
-        renderItem={({ item }) => (
-              <View style={globalStyles.projectCard}>
-                <FlatlistPublicProjectItem
-                  project={item}
-                  user={user}
-                  />
+      {load ? <Loading /> :
+        <FlatList
 
-                <View style={globalStyles.projectCardFooter}>
+          data={projectList}
+          renderItem={({ item }) => (
+            <View style={globalStyles.projectCard}>
+              <FlatlistPublicProjectItem
+                project={item}
+                user={user}
+              />
 
-                  <View style={globalStyles.projectCreatedAt}>
-                    <Text style={globalStyles.smallText}>{item.createdAt}</Text>
-                  </View>
+              <View style={globalStyles.projectCardFooter}>
 
+                <View style={globalStyles.projectCreatedAt}>
+                  <Text style={globalStyles.smallText}>{item.createdAt}</Text>
                 </View>
 
               </View>
-            )}
-      />}
+
+            </View>
+          )}
+        />}
 
     </View>
   );

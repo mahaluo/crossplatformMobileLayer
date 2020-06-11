@@ -15,10 +15,10 @@ import { MaterialIcons } from "@expo/vector-icons";
 import * as firebase from "firebase";
 import "firebase/firestore";
 import Loading from "../components/loading";
-import Account from "../components/tabcomponents/account";
-import Projects from "../components/tabcomponents/projects";
-import NewProject from "../components/newProject";
-import PublicProjectFeed from "../components/publicProjectFeed";
+import Account from "../components/tabcomponents/account/account";
+import Projects from "../components/tabcomponents/projects/projects";
+import NewProject from "../components/tabcomponents/projects/newProject";
+import PublicProjectFeed from "../components/tabcomponents/public/publicProjectFeed";
 
 
 function Home({ navigation }) {

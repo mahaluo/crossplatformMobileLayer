@@ -5,11 +5,13 @@ import {
     View,
     TouchableOpacity,
     Modal,
-    TextInput
+    TextInput,
+    FlatList
 } from "react-native";
-import { globalStyles } from "../styles/global";
+import { globalStyles } from "../../styles/global";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Loading from '../components/loading';
+import Loading from '../loading';
+import FlatListCommentItem from '../flatlistItems/flatlistCommentItem';
 
 const FlatlistPublicProjectItem = (props) => {
     console.log('public project flatlist item rendering.. ');
@@ -30,17 +32,14 @@ const FlatlistPublicProjectItem = (props) => {
     const [user, setUser] = useState(props.user);
 
     //toggle between showing project body or list of comments
-    const toggleComments = (id) => {
-        setLoadComments(true);
-        setTimeout(() => {
-            if (comments) {
-                setComments(false);
-            }
-            else {
-                setComments(true);
-            }
-            setLoadComments(false);
-        }, 1200);
+    const toggleComments = () => {
+        if (comments) {
+            setComments(false);
+        }
+        else {
+            setComments(true);
+            setLoadComments(true);
+        }
     }
 
     //add new comment to project
@@ -62,7 +61,6 @@ const FlatlistPublicProjectItem = (props) => {
                     }
                 );
                 const jsonResult = await commentResult.json();
-                console.log(jsonResult);
                 if (jsonResult.success) {
                     console.log("result: " + JSON.stringify(jsonResult));
                     setLoad(false);
@@ -95,41 +93,46 @@ const FlatlistPublicProjectItem = (props) => {
     //should stop from rendering too many times
     useEffect(() => {
         setNewComment('');
-        setLoad(false);
 
-        async function getComments() {
-            const commentList = [];
-            const projectComments = await fetch(
-                "http://192.168.0.2:3000/project-comments",
-                {
-                    method: "GET",
-                    headers: {
-                        user: props.user,
-                        id: props.project.id,
-                    },
+        setTimeout(() => {
+            async function getComments() {
+                const commentList = [];
+                const projectComments = await fetch(
+                    "http://192.168.0.2:3000/project-comments",
+                    {
+                        method: "GET",
+                        headers: {
+                            user: props.user,
+                            id: props.project.id,
+                        },
+                    }
+                );
+    
+                const jsonComment = await projectComments.json();
+                jsonComment.forEach((commentFound) => {
+                    commentList.push(commentFound.comment);
+                });
+    
+                setListComments(commentList);
+                if (commentList.length > 0) {
+                    setEmptyComments(true);
+                    
                 }
-            );
-
-            const jsonComment = await projectComments.json();
-            jsonComment.forEach((commentFound) => {
-                commentList.push(commentFound.comment);
-            });
-
-            setListComments(commentList);
-            if (commentList.length > 0) {
-                setEmptyComments(true);
+                else {
+                    setEmptyComments(false);
+                }
             }
-            else {
-                setEmptyComments(false);
+    
+            try {
+                console.log('trying to get comments.. ')
+                getComments();
+            } catch (error) {
+                console.log(error);
             }
-        }
-
-        try {
-            getComments();
-        } catch (error) {
-            console.log(error);
-        }
-    }, [modalVisible])
+        }, 800);
+       
+        setLoadComments(false);
+    }, [loadComments])
 
     return (
         <View>
@@ -193,14 +196,18 @@ const FlatlistPublicProjectItem = (props) => {
                 <View>
                     {comments ? <View>
                         
-                        {emptyComments ? <View>{listComments && listComments.map((comment, index) => {
-                            return (
-                                <View key={index}>
-                                    <Text>{comment.comment}</Text>
-                                    <Text style={globalStyles.smallText}>{comment.createdAt}</Text>
-                                </View>
-                            )
-                        })}</View>
+                        {emptyComments ? <View>
+                        
+                            <FlatList 
+                            data={listComments}
+                            renderItem={({item}) => (
+                                <FlatListCommentItem 
+                                    comment={item}
+                                />
+                            )}
+                            />
+                        
+                        </View>
 
                             : <View><Text>no comments on this project</Text></View>}
 
