@@ -248,6 +248,7 @@ function Home({ navigation }) {
                   account
                   </Text>
               </View>
+              <Account user={email}/>
               <View style={globalStyles.screenHeaderIconRow}>
                 <TouchableOpacity
                   style={styles.statusContainer}
@@ -260,8 +261,9 @@ function Home({ navigation }) {
                     color="coral"
                   />
                 </TouchableOpacity>
+                <Text style={globalStyles.projectIconText, {alignSelf: 'center'}}>sign out</Text>
               </View>
-              <Account />
+             
             </View>
           ) : null}
 

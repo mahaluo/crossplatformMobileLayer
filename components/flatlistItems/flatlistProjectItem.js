@@ -151,7 +151,7 @@ const FlatListProjectItem = (props) => {
                 console.log(error);
                 setComments(false);
             }
-        }, 1200);
+        }, 500);
 
         setLoadComments(false);
     }, [loadComments])

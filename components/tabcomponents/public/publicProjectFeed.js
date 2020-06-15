@@ -16,7 +16,7 @@ const PublicProjectFeed = (props) => {
   const [didLoad, setDidLoad] = useState(false);
 
   //set user credentials
-  const [user, setUser] = useState(props.user);
+  const [user, setUser] = useState();
 
   //refresh the feed of public projects
   const refreshPublicProjects = () => {
@@ -42,6 +42,7 @@ const PublicProjectFeed = (props) => {
 
         if (publicList.length > 0) {
           setProjectList(publicList);
+          setDidLoad(true);
         }
         else {
           console.log('no public projects found..');
@@ -61,7 +62,7 @@ const PublicProjectFeed = (props) => {
         setTimeout(() => {
           setLoad(false);
           setDidLoad(true);
-        }, 800);
+        }, 500);
       })
     } catch (error) {
       console.log(error);
@@ -71,14 +72,14 @@ const PublicProjectFeed = (props) => {
 
   //useEffect, should stop it from rendering too many times
   useEffect(() => {
-
+    setUser(props.user)
     try {
       refreshPublicProjects();
     } catch (error) {
       console.log(error);
     }
 
-  }, [didLoad])
+  }, [user])
 
 
   return (
