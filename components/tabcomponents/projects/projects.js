@@ -70,24 +70,6 @@ const Projects = (props) => {
     console.log(filteredList);
     setUserProjects(filteredList);
 
-    // async function deleteProject() {
-    //   firebase
-    //   .firestore()
-    //   .collection("projectList")
-    //   .doc("projects")
-    //   .collection(user)
-    //   .doc(id)
-    //   .delete()
-    //   .then(() => {
-    //     console.log("deleted project" + id);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-    // }
-
-    // deleteProject();
-
     async function deleteItem() {
       console.log("deleting projects for user: " + user);
       const res = await fetch (

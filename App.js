@@ -14,6 +14,8 @@ firebase.initializeApp(firebaseConfig);
 //home.js const AuthUser
 //projectComments.js const refreshFeed
 //projects.js const refreshProjects
+//projects.js const deleteItem
+//newProject.js const createNewProject
 //publicProjectFeed.js const refreshFeed
 
 const BottomTab = createBottomTabNavigator();
