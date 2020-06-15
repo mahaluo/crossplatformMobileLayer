@@ -28,8 +28,8 @@ function Home({ navigation }) {
   //user credentials
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
-  const [registerEmail, setRegisterEmail] = useState();
-  const [registerPassword, setRegisterPassword] = useState();
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
   const [user, setUser] = useState();
 
   //firebase
@@ -88,6 +88,30 @@ function Home({ navigation }) {
     }
   };
 
+  //register user
+  const registerUser = () => {
+    console.log("registering user... ");
+    console.log(registerEmail);
+    console.log(registerPassword);
+    setLoad(true);
+
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(registerEmail, registerPassword)
+      .then((user) => {
+        console.log("registered user.. ");
+        console.log("credentials: " + registerEmail);
+      })
+      .catch((error) => {
+        console.log(error);
+        console.log("register error.. ");
+      }).finally(() => {
+        setLoad(false);
+        setRegisterEmail('');
+        setRegisterPassword('');
+      });
+  }
+
   //toggles between register and login stuff
   const triggerModal = () => {
     if (registerOpen) {
@@ -132,14 +156,14 @@ function Home({ navigation }) {
   //store token in localstorage if user wants to be remembered
   async function storeToken() {
     try {
-      if(checked) {
+      if (checked) {
         await AsyncStorage.setItem("user", email);
         console.log('user checked remember me.. ' + email);
       }
       else {
         console.log('user did not check remember me.. ');
       }
-      
+
     } catch (error) {
       console.log("something bad happened", error);
     }
@@ -154,7 +178,7 @@ function Home({ navigation }) {
         setChecked(true);
         setEmail(userData);
       }
-      
+
     } catch (error) {
       console.log("something bad happened", error);
     }
@@ -225,7 +249,7 @@ function Home({ navigation }) {
           </View>
 
           {home ? (
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1 }}>
               <View style={globalStyles.screenHeader}>
                 <Text style={globalStyles.screenHeaderTitle}>
                   public projects
@@ -248,7 +272,7 @@ function Home({ navigation }) {
                   account
                   </Text>
               </View>
-              <Account user={email}/>
+              <Account user={email} />
               <View style={globalStyles.screenHeaderIconRow}>
                 <TouchableOpacity
                   style={styles.statusContainer}
@@ -261,9 +285,9 @@ function Home({ navigation }) {
                     color="coral"
                   />
                 </TouchableOpacity>
-                <Text style={globalStyles.projectIconText, {alignSelf: 'center'}}>sign out</Text>
+                <Text style={globalStyles.projectIconText, { alignSelf: 'center' }}>sign out</Text>
               </View>
-             
+
             </View>
           ) : null}
 
