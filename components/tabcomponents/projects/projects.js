@@ -70,23 +70,43 @@ const Projects = (props) => {
     console.log(filteredList);
     setUserProjects(filteredList);
 
-    async function deleteProject() {
-      firebase
-      .firestore()
-      .collection("projectList")
-      .doc("projects")
-      .collection(user)
-      .doc(id)
-      .delete()
-      .then(() => {
-        console.log("deleted project" + id);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    // async function deleteProject() {
+    //   firebase
+    //   .firestore()
+    //   .collection("projectList")
+    //   .doc("projects")
+    //   .collection(user)
+    //   .doc(id)
+    //   .delete()
+    //   .then(() => {
+    //     console.log("deleted project" + id);
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
+    // }
+
+    // deleteProject();
+
+    async function deleteItem() {
+      console.log("deleting projects for user: " + user);
+      const res = await fetch (
+        "http://192.168.0.2:3000/delete-project",
+        {
+          method: "post",
+          headers: {
+            user: user,
+            id: id
+          },
+        }
+      );
     }
 
-    deleteProject();
+    try {
+      deleteItem();
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   //should stop from rendering too many times

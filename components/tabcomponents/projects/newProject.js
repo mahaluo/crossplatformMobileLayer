@@ -25,11 +25,11 @@ const NewProject = (props) => {
 
   //use load while setting up content
   const [load, setLoad] = useState(true);
-  const [newProjectTitle, setNewProjectTitle] = useState();
-  const [newProjectBody, setNewProjectBody] = useState();
+  const [newProjectTitle, setNewProjectTitle] = useState('');
+  const [newProjectBody, setNewProjectBody] = useState('');
 
   useEffect(() => {
-    
+
     setTimeout(() => {
       setLoad(false);
     }, 600);
@@ -40,35 +40,43 @@ const NewProject = (props) => {
   const createNewProject = () => {
     setLoad(true);
 
-    const newProject = {
-      user: props.user,
-      title: newProjectTitle,
-      body: newProjectBody,
-      createdAt: new Date(),
-      solved: false,
-      shared: false,
-    };
+    async function create() {
+      try {
+        const res = await fetch("http://192.168.0.2:3000/create-project", {
+          method: "GET",
+          headers: {
+            user: props.user,
+            title: newProjectTitle,
+            body: newProjectBody
+          },
+        });
 
-    firebase
-      .firestore()
-      .collection("projectList")
-      .doc("projects")
-      .collection('users')
-      .doc(props.user)
-      .collection('userproject')
-      .add({
-        ...newProject,
-      })
-      .then(() => {
-        console.log("created project");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+        const jsonRes = await res.json();
+        if (jsonRes.error) {
+          throw jsonRes.error;
+        }
+        else {
+          console.log("user: " + jsonRes + " signed in.. ");
+        }
 
-    setLoad(false);
-    setNewProjectTitle("");
-    setNewProjectBody("");
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    if (newProjectTitle.length > 0 && newProjectBody.length > 0) {
+      try {
+        create().finally(() => {
+          setLoad(false);
+          setNewProjectTitle('');
+          setNewProjectBody('');
+        });
+
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
   };
 
   //clear all text boxes 
@@ -102,24 +110,24 @@ const NewProject = (props) => {
           ></TextInput>
         </View>
 
-          <View style={globalStyles.projectIconRow}>
-            <TouchableOpacity
-              onPress={() => clearNewProjectBody()}
-              style={globalStyles.projectIcon}
-            >
-              <MaterialIcons name="clear" size={40} color="coral" />
-            </TouchableOpacity>
+        <View style={globalStyles.projectIconRow}>
+          <TouchableOpacity
+            onPress={() => clearNewProjectBody()}
+            style={globalStyles.projectIcon}
+          >
+            <MaterialIcons name="clear" size={40} color="coral" />
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => createNewProject()}
-              style={globalStyles.projectIcon}
-            >
-              <MaterialIcons name="note-add" size={40} color="coral" />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            onPress={() => createNewProject()}
+            style={globalStyles.projectIcon}
+          >
+            <MaterialIcons name="note-add" size={40} color="coral" />
+          </TouchableOpacity>
         </View>
+      </View>
       }
-      
+
     </View>
   );
 };

@@ -10,6 +10,12 @@ import { firebaseConfig } from "./config";
 
 firebase.initializeApp(firebaseConfig);
 
+//IP needs to be changed in a number of places
+//home.js const AuthUser
+//projectComments.js const refreshFeed
+//projects.js const refreshProjects
+//publicProjectFeed.js const refreshFeed
+
 const BottomTab = createBottomTabNavigator();
 
 function App() {
