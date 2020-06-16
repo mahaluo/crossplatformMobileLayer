@@ -17,6 +17,9 @@ firebase.initializeApp(firebaseConfig);
 //projects.js const deleteItem
 //newProject.js const createNewProject
 //publicProjectFeed.js const refreshFeed
+//flatListProjectItem.js const toggle
+//flatListPublicProjectItem.js const addComment
+//flatListPublicProjectItem.js useEffect
 
 const BottomTab = createBottomTabNavigator();
 
